@@ -1,0 +1,557 @@
+# Sistema Hospitalar
+
+## 1. Descrição do domínio
+
+O projeto representa um **Sistema Hospitalar** para gerenciamento de
+pacientes, médicos, consultas, diagnósticos e receitas.
+
+O sistema permite:
+
+-   cadastrar pacientes;
+-   cadastrar médicos e suas especialidades;
+-   registrar consultas realizadas entre pacientes e médicos;
+-   registrar diagnósticos relacionados às consultas;
+-   registrar receitas e medicamentos prescritos;
+-   controlar informações de acesso dos pacientes e médicos;
+-   controlar permissões de acesso às tabelas;
+-   armazenar o preço da consulta e calcular automaticamente o imposto e
+    o valor total.
+
+### Entidades principais
+
+-   **PACIENTE**: armazena os dados cadastrais e de acesso dos
+    pacientes.
+-   **MEDICO**: armazena os dados dos médicos, CRM, especialidade e
+    preço da consulta.
+-   **CONSULTA**: registra o atendimento realizado por um médico para um
+    paciente.
+-   **DIAGNOSTICO**: armazena diagnósticos associados a uma consulta.
+-   **RECEITA**: armazena medicamentos, dosagens e instruções associados
+    a uma consulta.
+
+------------------------------------------------------------------------
+
+## 2. Modelo lógico
+
+### PACIENTE
+
+  Campo             Tipo           Restrição
+  ----------------- -------------- ------------------
+  cpf               VARCHAR(14)    PK
+  nome              VARCHAR(100)   NOT NULL
+  data_nascimento   DATE           NOT NULL
+  telefone          VARCHAR(15)    
+  endereco          VARCHAR(255)   
+  usuario           VARCHAR(50)    UNIQUE, NOT NULL
+  senha             VARCHAR(255)   NOT NULL
+
+### MEDICO
+
+  Campo            Tipo            Restrição
+  ---------------- --------------- ------------------
+  crm              VARCHAR(20)     PK
+  nome             VARCHAR(100)    NOT NULL
+  especialidade    VARCHAR(100)    NOT NULL
+  telefone         VARCHAR(15)     
+  usuario          VARCHAR(50)     UNIQUE, NOT NULL
+  senha            VARCHAR(255)    NOT NULL
+  preco_consulta   DECIMAL(10,2)   NOT NULL
+
+### CONSULTA
+
+  Campo           Tipo                Restrição
+  --------------- ------------------- --------------
+  id_consulta     INT                 PK, IDENTITY
+  cpf_paciente    VARCHAR(14)         FK, NOT NULL
+  crm_medico      VARCHAR(20)         FK, NOT NULL
+  data_consulta   DATETIME            NOT NULL
+  diagnostico     TEXT                
+  observacoes     TEXT                
+  preco           DECIMAL(10,2)       NOT NULL
+  imposto         DECIMAL calculado   Computado
+  total           DECIMAL calculado   Computado
+
+Relacionamentos:
+
+-   `CONSULTA.cpf_paciente` referencia `PACIENTE.cpf`.
+-   `CONSULTA.crm_medico` referencia `MEDICO.crm`.
+
+### DIAGNOSTICO
+
+  Campo            Tipo       Restrição
+  ---------------- ---------- --------------
+  id_diagnostico   INT        PK, IDENTITY
+  id_consulta      INT        FK, NOT NULL
+  descricao        TEXT       NOT NULL
+  data_registro    DATETIME   NOT NULL
+
+`DIAGNOSTICO.id_consulta` referencia `CONSULTA.id_consulta`.
+
+### RECEITA
+
+  Campo          Tipo           Restrição
+  -------------- -------------- --------------
+  id_receita     INT            PK, IDENTITY
+  id_consulta    INT            FK, NOT NULL
+  medicamento    VARCHAR(100)   NOT NULL
+  dosagem        VARCHAR(50)    
+  instrucoes     TEXT           
+  descricao      TEXT           NOT NULL
+  data_emissao   DATETIME       NOT NULL
+
+`RECEITA.id_consulta` referencia `CONSULTA.id_consulta`.
+
+### Cardinalidades
+
+-   Um **paciente** pode possuir várias consultas.
+    `PACIENTE 1:N CONSULTA`.
+-   Um **médico** pode atender várias consultas. `MEDICO 1:N CONSULTA`.
+-   Uma **consulta** pode possuir vários diagnósticos.
+    `CONSULTA 1:N DIAGNOSTICO`.
+-   Uma **consulta** pode possuir várias receitas.
+    `CONSULTA 1:N RECEITA`.
+
+------------------------------------------------------------------------
+
+## 3. Justificativa das escolhas
+
+### Chaves primárias
+
+O **CPF** foi escolhido como chave primária de `PACIENTE` porque
+identifica unicamente o paciente.
+
+O **CRM** foi escolhido como chave primária de `MEDICO` porque
+identifica o médico profissionalmente.
+
+As tabelas `CONSULTA`, `DIAGNOSTICO` e `RECEITA` utilizam
+identificadores numéricos com `IDENTITY`, pois cada registro representa
+uma ocorrência própria do sistema.
+
+### Chaves estrangeiras
+
+As chaves estrangeiras garantem a integridade dos relacionamentos.
+
+-   Uma consulta não pode existir para um paciente inexistente.
+-   Uma consulta não pode existir para um médico inexistente.
+-   Um diagnóstico deve estar relacionado a uma consulta existente.
+-   Uma receita deve estar relacionada a uma consulta existente.
+
+### Restrições UNIQUE
+
+Os campos `usuario` de paciente e médico são `UNIQUE` para impedir
+contas duplicadas.
+
+### Campos calculados
+
+Na tabela `CONSULTA`:
+
+-   `imposto` calcula 15% do preço;
+-   `total` calcula o preço acrescido de 15%.
+
+Isso evita armazenar manualmente valores que podem ser derivados do
+preço.
+
+### Normalização
+
+As informações foram separadas em tabelas de acordo com suas
+responsabilidades. Pacientes, médicos, consultas, diagnósticos e
+receitas possuem dados próprios, enquanto os relacionamentos são
+realizados por chaves estrangeiras.
+
+------------------------------------------------------------------------
+
+## 4. Índices
+
+Foram definidos quatro índices para melhorar consultas frequentes:
+
+``` sql
+CREATE INDEX idx_paciente_nome
+ON PACIENTE(nome);
+
+CREATE INDEX idx_consulta_data
+ON CONSULTA(data_consulta);
+
+CREATE INDEX idx_diagnostico_consulta
+ON DIAGNOSTICO(id_consulta);
+
+CREATE INDEX idx_receita_data
+ON RECEITA(data_emissao);
+```
+
+### Justificativa
+
+-   `idx_paciente_nome`: facilita buscas de pacientes pelo nome.
+-   `idx_consulta_data`: melhora consultas filtradas ou ordenadas por
+    data.
+-   `idx_diagnostico_consulta`: acelera a busca dos diagnósticos de uma
+    consulta.
+-   `idx_receita_data`: facilita consultas de receitas por período.
+
+As chaves primárias e restrições `UNIQUE` também possuem mecanismos de
+indexação próprios no SQL Server.
+
+------------------------------------------------------------------------
+
+## 5. Inserções de registros
+
+O banco possui registros de exemplo para todas as entidades principais.
+
+### Pacientes
+
+``` sql
+INSERT INTO PACIENTE
+(cpf, nome, data_nascimento, telefone, endereco, usuario, senha)
+VALUES
+('123.456.789-00', 'João Silva', '1990-05-10', '11987654321',
+ 'Rua das Flores, 123', 'joao.silva', 'senha123');
+```
+
+Também foram inseridos Maria Oliveira e Carlos Pereira.
+
+### Médicos
+
+``` sql
+INSERT INTO MEDICO
+(crm, nome, especialidade, telefone, usuario, senha, preco_consulta)
+VALUES
+('CRM12345', 'Dra. Ana Souza', 'Cardiologia',
+ '11987654322', 'ana.souza', 'senha456', 300.00);
+```
+
+Também foram inseridos Dr. Pedro Santos e Dra. Beatriz Lima.
+
+### Consultas
+
+Foram cadastradas consultas vinculando pacientes e médicos por meio das
+chaves estrangeiras.
+
+### Diagnósticos e receitas
+
+Foram cadastrados diagnósticos e receitas vinculados às consultas por
+`id_consulta`.
+
+------------------------------------------------------------------------
+
+## 6. Lista de consultas SQL
+
+### 6.1 Listar todos os pacientes
+
+``` sql
+SELECT *
+FROM PACIENTE;
+```
+
+**Objetivo:** visualizar os pacientes cadastrados.
+
+### 6.2 Listar médicos por especialidade
+
+``` sql
+SELECT nome, especialidade, crm, preco_consulta
+FROM MEDICO
+ORDER BY especialidade;
+```
+
+**Objetivo:** apresentar os médicos organizados por especialidade.
+
+### 6.3 Consultas com paciente e médico
+
+``` sql
+SELECT
+    c.id_consulta,
+    p.nome AS paciente,
+    m.nome AS medico,
+    m.especialidade,
+    c.data_consulta,
+    c.preco,
+    c.imposto,
+    c.total
+FROM CONSULTA c
+INNER JOIN PACIENTE p
+    ON c.cpf_paciente = p.cpf
+INNER JOIN MEDICO m
+    ON c.crm_medico = m.crm;
+```
+
+**Objetivo:** consultar os principais dados de cada atendimento.
+
+### 6.4 Diagnósticos de cada consulta
+
+``` sql
+SELECT
+    d.id_diagnostico,
+    d.descricao,
+    d.data_registro,
+    c.id_consulta,
+    p.nome AS paciente
+FROM DIAGNOSTICO d
+INNER JOIN CONSULTA c
+    ON d.id_consulta = c.id_consulta
+INNER JOIN PACIENTE p
+    ON c.cpf_paciente = p.cpf;
+```
+
+**Objetivo:** relacionar os diagnósticos aos pacientes e às consultas.
+
+### 6.5 Receitas emitidas
+
+``` sql
+SELECT
+    r.id_receita,
+    p.nome AS paciente,
+    m.nome AS medico,
+    r.medicamento,
+    r.dosagem,
+    r.instrucoes,
+    r.data_emissao
+FROM RECEITA r
+INNER JOIN CONSULTA c
+    ON r.id_consulta = c.id_consulta
+INNER JOIN PACIENTE p
+    ON c.cpf_paciente = p.cpf
+INNER JOIN MEDICO m
+    ON c.crm_medico = m.crm;
+```
+
+**Objetivo:** consultar as receitas relacionando paciente, médico e
+consulta.
+
+### 6.6 Consultas realizadas em determinado período
+
+``` sql
+SELECT
+    c.id_consulta,
+    p.nome AS paciente,
+    m.nome AS medico,
+    c.data_consulta
+FROM CONSULTA c
+INNER JOIN PACIENTE p
+    ON c.cpf_paciente = p.cpf
+INNER JOIN MEDICO m
+    ON c.crm_medico = m.crm
+WHERE c.data_consulta BETWEEN '2025-09-01' AND '2025-10-31'
+ORDER BY c.data_consulta;
+```
+
+**Objetivo:** localizar atendimentos dentro de um período.
+
+### 6.7 Quantidade de consultas por médico
+
+``` sql
+SELECT
+    m.crm,
+    m.nome,
+    COUNT(c.id_consulta) AS quantidade_consultas
+FROM MEDICO m
+LEFT JOIN CONSULTA c
+    ON m.crm = c.crm_medico
+GROUP BY m.crm, m.nome;
+```
+
+**Objetivo:** apresentar a quantidade de consultas associadas a cada
+médico.
+
+------------------------------------------------------------------------
+
+## 7. Transações
+
+As transações garantem que um conjunto de operações seja tratado como
+uma unidade. Se todas as operações forem concluídas corretamente,
+utiliza-se `COMMIT`. Se ocorrer um erro, utiliza-se `ROLLBACK`.
+
+### Exemplo de transação de cadastro
+
+``` sql
+BEGIN TRANSACTION;
+
+INSERT INTO PACIENTE
+(cpf, nome, data_nascimento, telefone, endereco, usuario, senha)
+VALUES
+('111.222.333-44', 'Novo Paciente', '1995-01-10',
+ '11999999999', 'Rua Nova, 100', 'novo.paciente', 'senha123');
+
+INSERT INTO CONSULTA
+(cpf_paciente, crm_medico, data_consulta, diagnostico, observacoes, preco)
+VALUES
+('111.222.333-44', 'CRM12345', GETDATE(),
+ 'Consulta inicial', 'Cadastro realizado por transação', 300.00);
+
+COMMIT;
+```
+
+As duas operações são confirmadas juntas.
+
+### Exemplo de ROLLBACK
+
+``` sql
+BEGIN TRANSACTION;
+
+INSERT INTO PACIENTE
+(cpf, nome, data_nascimento, telefone, endereco, usuario, senha)
+VALUES
+('222.333.444-55', 'Paciente Teste', '1992-04-20',
+ '11988888888', 'Rua Teste, 50', 'paciente.teste', 'senha123');
+
+ROLLBACK;
+```
+
+Nesse caso, o cadastro é desfeito.
+
+### Importância
+
+As transações ajudam a preservar a consistência do banco. Por exemplo,
+se o cadastro de uma consulta depender de um paciente existente e uma
+das operações falhar, o `ROLLBACK` pode impedir que o banco fique com
+dados parcialmente registrados.
+
+------------------------------------------------------------------------
+
+## 8. Análise do EXPLAIN / plano de execução
+
+Este projeto utiliza sintaxe do **SQL Server**, que não possui o comando
+`EXPLAIN` com a mesma sintaxe encontrada em MySQL ou PostgreSQL. No SQL
+Server, a análise equivalente pode ser feita pelo plano de execução ou
+pelo `SHOWPLAN`.
+
+### Consulta analisada
+
+``` sql
+SELECT
+    c.id_consulta,
+    p.nome AS paciente,
+    m.nome AS medico,
+    c.data_consulta
+FROM CONSULTA c
+INNER JOIN PACIENTE p
+    ON c.cpf_paciente = p.cpf
+INNER JOIN MEDICO m
+    ON c.crm_medico = m.crm
+WHERE c.data_consulta >= '2025-09-01'
+  AND c.data_consulta < '2025-11-01';
+```
+
+### Análise do plano
+
+O índice:
+
+``` sql
+idx_consulta_data
+```
+
+foi criado para favorecer o filtro por `data_consulta`.
+
+Os relacionamentos com `PACIENTE` e `MEDICO` utilizam as chaves
+primárias e estrangeiras. Dessa forma, o otimizador do SQL Server pode
+escolher operações de busca e junção adequadas de acordo com o volume de
+dados e as estatísticas disponíveis.
+
+Para visualizar o plano estimado no SQL Server Management Studio:
+
+``` sql
+SET SHOWPLAN_ALL ON;
+
+SELECT
+    c.id_consulta,
+    p.nome AS paciente,
+    m.nome AS medico,
+    c.data_consulta
+FROM CONSULTA c
+INNER JOIN PACIENTE p
+    ON c.cpf_paciente = p.cpf
+INNER JOIN MEDICO m
+    ON c.crm_medico = m.crm
+WHERE c.data_consulta >= '2025-09-01'
+  AND c.data_consulta < '2025-11-01';
+
+SET SHOWPLAN_ALL OFF;
+```
+
+### O que deve ser observado
+
+Na análise do plano de execução devem ser observados:
+
+-   tipo de acesso às tabelas;
+-   utilização dos índices;
+-   operações de `JOIN`;
+-   custo estimado das operações;
+-   quantidade estimada de linhas;
+-   possíveis `Table Scan` ou `Index Scan`;
+-   possibilidade de utilização de `Index Seek`.
+
+Com poucos registros, o SQL Server pode optar por uma varredura mesmo
+existindo índice. Isso não significa necessariamente que o índice esteja
+incorreto. O plano depende da quantidade de dados e das estatísticas do
+banco.
+
+------------------------------------------------------------------------
+
+## 9. Permissões
+
+Foram definidas permissões para separar responsabilidades entre
+usuários.
+
+### Usuário de leitura
+
+``` sql
+GRANT SELECT ON CONSULTA TO paciente_user;
+GRANT SELECT ON RECEITA TO paciente_user;
+GRANT SELECT ON DIAGNOSTICO TO paciente_user;
+```
+
+Esse usuário pode consultar informações de consultas, receitas e
+diagnósticos.
+
+### Usuário de escrita
+
+``` sql
+GRANT INSERT, UPDATE ON PACIENTE TO medico_user;
+GRANT INSERT, UPDATE ON MEDICO TO medico_user;
+GRANT INSERT, UPDATE ON CONSULTA TO medico_user;
+GRANT INSERT, UPDATE ON RECEITA TO medico_user;
+GRANT INSERT, UPDATE ON DIAGNOSTICO TO medico_user;
+```
+
+Esse usuário possui permissões para inserir e atualizar informações
+relacionadas ao funcionamento do sistema.
+
+O controle de permissões reduz o acesso desnecessário às informações e
+separa as responsabilidades dos usuários.
+
+------------------------------------------------------------------------
+
+## 10. Integridade e segurança
+
+O banco utiliza:
+
+-   chaves primárias;
+-   chaves estrangeiras;
+-   restrições `NOT NULL`;
+-   restrições `UNIQUE`;
+-   índices;
+-   permissões por usuário;
+-   transações;
+-   campos calculados.
+
+As senhas armazenadas no banco são apenas exemplos para fins acadêmicos.
+Em um sistema real, elas devem ser armazenadas utilizando técnicas
+adequadas de hash e nunca em texto puro.
+
+------------------------------------------------------------------------
+
+## 11. Conclusão
+
+O banco de dados foi estruturado para representar o fluxo básico de
+atendimento hospitalar, mantendo os dados separados por responsabilidade
+e utilizando relacionamentos entre as entidades.
+
+O modelo contempla:
+
+-   descrição do domínio;
+-   modelo lógico;
+-   justificativa das decisões de modelagem;
+-   índices;
+-   inserções de registros;
+-   consultas SQL;
+-   transações com `COMMIT` e `ROLLBACK`;
+-   análise do plano de execução equivalente ao `EXPLAIN` no SQL Server;
+-   permissões de usuários;
+-   mecanismos de integridade e segurança.

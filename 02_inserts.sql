@@ -1,0 +1,243 @@
+-- 02_inserts.sql
+-- INSERT INTO: adiciona novos registros em uma tabela.
+-- VALUES: informa os valores que serão gravados nas colunas.
+-- Cada bloco abaixo insere 15 registros, atendendo ao requisito mínimo do trabalho.
+-- Insere 15 pacientes com CPF informado manualmente.
+-- O CPF não é gerado pelo banco: ele é fornecido no cadastro.
+INSERT INTO paciente (cpf,nome,data_nascimento,telefone,endereco,usuario,senha,sexo,ativo) VALUES
+('11111111101', 'Paciente 1', '1981-02-02', '(98) 900000001', 'Rua Hospitalar, 101', 'paciente1', 'senha001', 'M', TRUE),
+('11111111102', 'Paciente 2', '1982-03-03', '(98) 900000002', 'Rua Hospitalar, 102', 'paciente2', 'senha002', 'F', TRUE),
+('11111111103', 'Paciente 3', '1983-04-04', '(98) 900000003', 'Rua Hospitalar, 103', 'paciente3', 'senha003', 'O', TRUE),
+('11111111104', 'Paciente 4', '1984-05-05', '(98) 900000004', 'Rua Hospitalar, 104', 'paciente4', 'senha004', 'M', TRUE),
+('11111111105', 'Paciente 5', '1985-06-06', '(98) 900000005', 'Rua Hospitalar, 105', 'paciente5', 'senha005', 'F', TRUE),
+('11111111106', 'Paciente 6', '1986-07-07', '(98) 900000006', 'Rua Hospitalar, 106', 'paciente6', 'senha006', 'O', TRUE),
+('11111111107', 'Paciente 7', '1987-08-08', '(98) 900000007', 'Rua Hospitalar, 107', 'paciente7', 'senha007', 'M', TRUE),
+('11111111108', 'Paciente 8', '1988-09-09', '(98) 900000008', 'Rua Hospitalar, 108', 'paciente8', 'senha008', 'F', TRUE),
+('11111111109', 'Paciente 9', '1989-10-10', '(98) 900000009', 'Rua Hospitalar, 109', 'paciente9', 'senha009', 'O', TRUE),
+('11111111110', 'Paciente 10', '1990-11-11', '(98) 900000010', 'Rua Hospitalar, 110', 'paciente10', 'senha010', 'M', TRUE),
+('11111111111', 'Paciente 11', '1991-12-12', '(98) 900000011', 'Rua Hospitalar, 111', 'paciente11', 'senha011', 'F', TRUE),
+('11111111112', 'Paciente 12', '1992-01-13', '(98) 900000012', 'Rua Hospitalar, 112', 'paciente12', 'senha012', 'O', TRUE),
+('11111111113', 'Paciente 13', '1993-02-14', '(98) 900000013', 'Rua Hospitalar, 113', 'paciente13', 'senha013', 'M', TRUE),
+('11111111114', 'Paciente 14', '1994-03-15', '(98) 900000014', 'Rua Hospitalar, 114', 'paciente14', 'senha014', 'F', TRUE),
+('11111111115', 'Paciente 15', '1995-04-16', '(98) 900000015', 'Rua Hospitalar, 115', 'paciente15', 'senha015', 'O', TRUE);
+-- Insere 15 médicos com CRM informado manualmente.
+INSERT INTO medico (crm,nome,especialidade,telefone,usuario,senha,preco_consulta,ativo) VALUES
+('CRM-MA-00001', 'Médico 1', 'Cardiologia', '(98) 900000001', 'medico1', 'senha001', 190.00, TRUE),
+('CRM-MA-00002', 'Médico 2', 'Ortopedia', '(98) 900000002', 'medico2', 'senha002', 200.00, TRUE),
+('CRM-MA-00003', 'Médico 3', 'Dermatologia', '(98) 900000003', 'medico3', 'senha003', 210.00, TRUE),
+('CRM-MA-00004', 'Médico 4', 'Pediatria', '(98) 900000004', 'medico4', 'senha004', 220.00, TRUE),
+('CRM-MA-00005', 'Médico 5', 'Neurologia', '(98) 900000005', 'medico5', 'senha005', 230.00, TRUE),
+('CRM-MA-00006', 'Médico 6', 'Clínica Geral', '(98) 900000006', 'medico6', 'senha006', 240.00, TRUE),
+('CRM-MA-00007', 'Médico 7', 'Oftalmologia', '(98) 900000007', 'medico7', 'senha007', 250.00, TRUE),
+('CRM-MA-00008', 'Médico 8', 'Ginecologia', '(98) 900000008', 'medico8', 'senha008', 260.00, TRUE),
+('CRM-MA-00009', 'Médico 9', 'Urologia', '(98) 900000009', 'medico9', 'senha009', 270.00, TRUE),
+('CRM-MA-00010', 'Médico 10', 'Psiquiatria', '(98) 900000010', 'medico10', 'senha010', 280.00, TRUE),
+('CRM-MA-00011', 'Médico 11', 'Endocrinologia', '(98) 900000011', 'medico11', 'senha011', 290.00, TRUE),
+('CRM-MA-00012', 'Médico 12', 'Oncologia', '(98) 900000012', 'medico12', 'senha012', 300.00, TRUE),
+('CRM-MA-00013', 'Médico 13', 'Pneumologia', '(98) 900000013', 'medico13', 'senha013', 310.00, TRUE),
+('CRM-MA-00014', 'Médico 14', 'Gastroenterologia', '(98) 900000014', 'medico14', 'senha014', 320.00, TRUE),
+('CRM-MA-00015', 'Médico 15', 'Infectologia', '(98) 900000015', 'medico15', 'senha015', 330.00, TRUE);
+-- Insere 15 especialidades médicas.
+INSERT INTO especialidade (nome,descricao,ativo) VALUES
+('Cardiologia', 'Atendimento especializado em cardiologia', TRUE),
+('Ortopedia', 'Atendimento especializado em ortopedia', TRUE),
+('Dermatologia', 'Atendimento especializado em dermatologia', TRUE),
+('Pediatria', 'Atendimento especializado em pediatria', TRUE),
+('Neurologia', 'Atendimento especializado em neurologia', TRUE),
+('Clínica Geral', 'Atendimento especializado em clínica geral', TRUE),
+('Oftalmologia', 'Atendimento especializado em oftalmologia', TRUE),
+('Ginecologia', 'Atendimento especializado em ginecologia', TRUE),
+('Urologia', 'Atendimento especializado em urologia', TRUE),
+('Psiquiatria', 'Atendimento especializado em psiquiatria', TRUE),
+('Endocrinologia', 'Atendimento especializado em endocrinologia', TRUE),
+('Oncologia', 'Atendimento especializado em oncologia', TRUE),
+('Pneumologia', 'Atendimento especializado em pneumologia', TRUE),
+('Gastroenterologia', 'Atendimento especializado em gastroenterologia', TRUE),
+('Infectologia', 'Atendimento especializado em infectologia', TRUE);
+-- Insere 15 convênios.
+INSERT INTO convenio (nome,telefone,percentual_desconto,ativo) VALUES
+('Convenio 1', '(98) 30000001', 6.00, TRUE),
+('Convenio 2', '(98) 30000002', 7.00, TRUE),
+('Convenio 3', '(98) 30000003', 8.00, TRUE),
+('Convenio 4', '(98) 30000004', 9.00, TRUE),
+('Convenio 5', '(98) 30000005', 10.00, TRUE),
+('Convenio 6', '(98) 30000006', 11.00, TRUE),
+('Convenio 7', '(98) 30000007', 12.00, TRUE),
+('Convenio 8', '(98) 30000008', 13.00, TRUE),
+('Convenio 9', '(98) 30000009', 14.00, TRUE),
+('Convenio 10', '(98) 30000010', 15.00, TRUE),
+('Convenio 11', '(98) 30000011', 16.00, TRUE),
+('Convenio 12', '(98) 30000012', 17.00, TRUE),
+('Convenio 13', '(98) 30000013', 18.00, TRUE),
+('Convenio 14', '(98) 30000014', 19.00, TRUE),
+('Convenio 15', '(98) 30000015', 20.00, TRUE);
+-- Insere 15 unidades hospitalares.
+INSERT INTO unidade (nome,endereco,telefone,capacidade,ativo) VALUES
+('Unidade 1', 'Avenida da Saúde, 101', '(98) 30000001', 55, TRUE),
+('Unidade 2', 'Avenida da Saúde, 102', '(98) 30000002', 60, TRUE),
+('Unidade 3', 'Avenida da Saúde, 103', '(98) 30000003', 65, TRUE),
+('Unidade 4', 'Avenida da Saúde, 104', '(98) 30000004', 70, TRUE),
+('Unidade 5', 'Avenida da Saúde, 105', '(98) 30000005', 75, TRUE),
+('Unidade 6', 'Avenida da Saúde, 106', '(98) 30000006', 80, TRUE),
+('Unidade 7', 'Avenida da Saúde, 107', '(98) 30000007', 85, TRUE),
+('Unidade 8', 'Avenida da Saúde, 108', '(98) 30000008', 90, TRUE),
+('Unidade 9', 'Avenida da Saúde, 109', '(98) 30000009', 95, TRUE),
+('Unidade 10', 'Avenida da Saúde, 110', '(98) 30000010', 100, TRUE),
+('Unidade 11', 'Avenida da Saúde, 111', '(98) 30000011', 105, TRUE),
+('Unidade 12', 'Avenida da Saúde, 112', '(98) 30000012', 110, TRUE),
+('Unidade 13', 'Avenida da Saúde, 113', '(98) 30000013', 115, TRUE),
+('Unidade 14', 'Avenida da Saúde, 114', '(98) 30000014', 120, TRUE),
+('Unidade 15', 'Avenida da Saúde, 115', '(98) 30000015', 125, TRUE);
+-- Insere 15 quartos.
+INSERT INTO quarto (id_unidade,numero,tipo,capacidade) VALUES
+(1, 'Q001', 'Enfermaria', 2),
+(2, 'Q002', 'UTI', 2),
+(3, 'Q003', 'Privativo', 1),
+(4, 'Q004', 'Enfermaria', 2),
+(5, 'Q005', 'UTI', 2),
+(6, 'Q006', 'Privativo', 1),
+(7, 'Q007', 'Enfermaria', 2),
+(8, 'Q008', 'UTI', 2),
+(9, 'Q009', 'Privativo', 1),
+(10, 'Q010', 'Enfermaria', 2),
+(11, 'Q011', 'UTI', 2),
+(12, 'Q012', 'Privativo', 1),
+(13, 'Q013', 'Enfermaria', 2),
+(14, 'Q014', 'UTI', 2),
+(15, 'Q015', 'Privativo', 1);
+-- Insere 15 leitos.
+INSERT INTO leito (id_quarto,numero,status) VALUES
+(1, 'L001', 'Livre'),
+(2, 'L002', 'Livre'),
+(3, 'L003', 'Livre'),
+(4, 'L004', 'Livre'),
+(5, 'L005', 'Livre'),
+(6, 'L006', 'Livre'),
+(7, 'L007', 'Livre'),
+(8, 'L008', 'Livre'),
+(9, 'L009', 'Livre'),
+(10, 'L010', 'Livre'),
+(11, 'L011', 'Livre'),
+(12, 'L012', 'Livre'),
+(13, 'L013', 'Livre'),
+(14, 'L014', 'Livre'),
+(15, 'L015', 'Livre');
+-- Insere 15 medicamentos e seus estoques.
+INSERT INTO medicamento (nome,principio_ativo,fabricante,preco,estoque) VALUES
+('Medicamento 1', 'Principio Ativo 1', 'Fabricante 1', 12.00, 21),
+('Medicamento 2', 'Principio Ativo 2', 'Fabricante 2', 14.00, 22),
+('Medicamento 3', 'Principio Ativo 3', 'Fabricante 3', 16.00, 23),
+('Medicamento 4', 'Principio Ativo 4', 'Fabricante 4', 18.00, 24),
+('Medicamento 5', 'Principio Ativo 5', 'Fabricante 5', 20.00, 25),
+('Medicamento 6', 'Principio Ativo 6', 'Fabricante 6', 22.00, 26),
+('Medicamento 7', 'Principio Ativo 7', 'Fabricante 7', 24.00, 27),
+('Medicamento 8', 'Principio Ativo 8', 'Fabricante 8', 26.00, 28),
+('Medicamento 9', 'Principio Ativo 9', 'Fabricante 9', 28.00, 29),
+('Medicamento 10', 'Principio Ativo 10', 'Fabricante 10', 30.00, 30),
+('Medicamento 11', 'Principio Ativo 11', 'Fabricante 11', 32.00, 31),
+('Medicamento 12', 'Principio Ativo 12', 'Fabricante 12', 34.00, 32),
+('Medicamento 13', 'Principio Ativo 13', 'Fabricante 13', 36.00, 33),
+('Medicamento 14', 'Principio Ativo 14', 'Fabricante 14', 38.00, 34),
+('Medicamento 15', 'Principio Ativo 15', 'Fabricante 15', 40.00, 35);
+-- Insere 15 consultas entre pacientes e médicos.
+INSERT INTO consulta (cpf_paciente,crm_medico,id_convenio,data_consulta,diagnostico,observacoes,preco,imposto,total,status) VALUES
+('11111111101', 'CRM-MA-00001', 1, '2025-02-02 09:00:00', 'Diagnóstico inicial 1', 'Observação da consulta 1', 190.00, 28.50, 218.50, 'Realizada'),
+('11111111102', 'CRM-MA-00002', 2, '2025-03-03 10:00:00', 'Diagnóstico inicial 2', 'Observação da consulta 2', 200.00, 30.00, 230.00, 'Agendada'),
+('11111111103', 'CRM-MA-00003', 3, '2025-04-04 11:00:00', 'Diagnóstico inicial 3', 'Observação da consulta 3', 210.00, 31.50, 241.50, 'Cancelada'),
+('11111111104', 'CRM-MA-00004', 4, '2025-05-05 12:00:00', 'Diagnóstico inicial 4', 'Observação da consulta 4', 220.00, 33.00, 253.00, 'Realizada'),
+('11111111105', 'CRM-MA-00005', 5, '2025-06-06 13:00:00', 'Diagnóstico inicial 5', 'Observação da consulta 5', 230.00, 34.50, 264.50, 'Agendada'),
+('11111111106', 'CRM-MA-00006', 6, '2025-07-07 14:00:00', 'Diagnóstico inicial 6', 'Observação da consulta 6', 240.00, 36.00, 276.00, 'Cancelada'),
+('11111111107', 'CRM-MA-00007', 7, '2025-08-08 15:00:00', 'Diagnóstico inicial 7', 'Observação da consulta 7', 250.00, 37.50, 287.50, 'Realizada'),
+('11111111108', 'CRM-MA-00008', 8, '2025-09-09 16:00:00', 'Diagnóstico inicial 8', 'Observação da consulta 8', 260.00, 39.00, 299.00, 'Agendada'),
+('11111111109', 'CRM-MA-00009', 9, '2025-10-10 08:00:00', 'Diagnóstico inicial 9', 'Observação da consulta 9', 270.00, 40.50, 310.50, 'Cancelada'),
+('11111111110', 'CRM-MA-00010', 10, '2025-11-11 09:00:00', 'Diagnóstico inicial 10', 'Observação da consulta 10', 280.00, 42.00, 322.00, 'Realizada'),
+('11111111111', 'CRM-MA-00011', 11, '2025-12-12 10:00:00', 'Diagnóstico inicial 11', 'Observação da consulta 11', 290.00, 43.50, 333.50, 'Agendada'),
+('11111111112', 'CRM-MA-00012', 12, '2025-01-13 11:00:00', 'Diagnóstico inicial 12', 'Observação da consulta 12', 300.00, 45.00, 345.00, 'Cancelada'),
+('11111111113', 'CRM-MA-00013', 13, '2025-02-14 12:00:00', 'Diagnóstico inicial 13', 'Observação da consulta 13', 310.00, 46.50, 356.50, 'Realizada'),
+('11111111114', 'CRM-MA-00014', 14, '2025-03-15 13:00:00', 'Diagnóstico inicial 14', 'Observação da consulta 14', 320.00, 48.00, 368.00, 'Agendada'),
+('11111111115', 'CRM-MA-00015', 15, '2025-04-16 14:00:00', 'Diagnóstico inicial 15', 'Observação da consulta 15', 330.00, 49.50, 379.50, 'Cancelada');
+-- Insere 15 diagnósticos das consultas.
+INSERT INTO diagnostico (id_consulta,descricao,data_registro,gravidade) VALUES
+(1, 'Diagnóstico detalhado da consulta 1', '2025-02-02 10:00:00', 'Leve'),
+(2, 'Diagnóstico detalhado da consulta 2', '2025-03-03 10:00:00', 'Moderada'),
+(3, 'Diagnóstico detalhado da consulta 3', '2025-04-04 10:00:00', 'Grave'),
+(4, 'Diagnóstico detalhado da consulta 4', '2025-05-05 10:00:00', 'Leve'),
+(5, 'Diagnóstico detalhado da consulta 5', '2025-06-06 10:00:00', 'Moderada'),
+(6, 'Diagnóstico detalhado da consulta 6', '2025-07-07 10:00:00', 'Grave'),
+(7, 'Diagnóstico detalhado da consulta 7', '2025-08-08 10:00:00', 'Leve'),
+(8, 'Diagnóstico detalhado da consulta 8', '2025-09-09 10:00:00', 'Moderada'),
+(9, 'Diagnóstico detalhado da consulta 9', '2025-10-10 10:00:00', 'Grave'),
+(10, 'Diagnóstico detalhado da consulta 10', '2025-11-11 10:00:00', 'Leve'),
+(11, 'Diagnóstico detalhado da consulta 11', '2025-12-12 10:00:00', 'Moderada'),
+(12, 'Diagnóstico detalhado da consulta 12', '2025-01-13 10:00:00', 'Grave'),
+(13, 'Diagnóstico detalhado da consulta 13', '2025-02-14 10:00:00', 'Leve'),
+(14, 'Diagnóstico detalhado da consulta 14', '2025-03-15 10:00:00', 'Moderada'),
+(15, 'Diagnóstico detalhado da consulta 15', '2025-04-16 10:00:00', 'Grave');
+-- Insere 15 receitas e medicamentos prescritos.
+INSERT INTO receita (id_consulta,id_medicamento,medicamento,dosagem,instrucoes,descricao,data_emissao,quantidade) VALUES
+(1, 1, 'Medicamento 1', '110mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 1', '2025-02-02', 2),
+(2, 2, 'Medicamento 2', '120mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 2', '2025-03-03', 3),
+(3, 3, 'Medicamento 3', '130mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 3', '2025-04-04', 1),
+(4, 4, 'Medicamento 4', '140mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 4', '2025-05-05', 2),
+(5, 5, 'Medicamento 5', '150mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 5', '2025-06-06', 3),
+(6, 6, 'Medicamento 6', '160mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 6', '2025-07-07', 1),
+(7, 7, 'Medicamento 7', '170mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 7', '2025-08-08', 2),
+(8, 8, 'Medicamento 8', '180mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 8', '2025-09-09', 3),
+(9, 9, 'Medicamento 9', '190mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 9', '2025-10-10', 1),
+(10, 10, 'Medicamento 10', '200mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 10', '2025-11-11', 2),
+(11, 11, 'Medicamento 11', '210mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 11', '2025-12-12', 3),
+(12, 12, 'Medicamento 12', '220mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 12', '2025-01-13', 1),
+(13, 13, 'Medicamento 13', '230mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 13', '2025-02-14', 2),
+(14, 14, 'Medicamento 14', '240mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 14', '2025-03-15', 3),
+(15, 15, 'Medicamento 15', '250mg', 'Tomar conforme orientação médica', 'Receita referente à consulta 15', '2025-04-16', 1);
+-- Insere 15 exames enviados pelos pacientes.
+INSERT INTO exame (cpf_paciente,id_consulta,tipo,descricao,arquivo_url,data_envio,status) VALUES
+('11111111101', 1, 'Hemograma', 'Exame laboratorial do paciente 1', 'https://hospital.local/exames/001.pdf', '2025-02-02 11:00:00', 'Analisado'),
+('11111111102', 2, 'Raio-X', 'Exame de imagem do paciente 2', 'https://hospital.local/exames/002.pdf', '2025-03-03 11:00:00', 'Enviado'),
+('11111111103', 3, 'Ultrassom', 'Exame de imagem do paciente 3', 'https://hospital.local/exames/003.pdf', '2025-04-04 11:00:00', 'Analisado'),
+('11111111104', 4, 'Glicemia', 'Exame laboratorial do paciente 4', 'https://hospital.local/exames/004.pdf', '2025-05-05 11:00:00', 'Enviado'),
+('11111111105', 5, 'Eletrocardiograma', 'Exame cardiologico do paciente 5', 'https://hospital.local/exames/005.pdf', '2025-06-06 11:00:00', 'Analisado'),
+('11111111106', 6, 'Tomografia', 'Exame de imagem do paciente 6', 'https://hospital.local/exames/006.pdf', '2025-07-07 11:00:00', 'Enviado'),
+('11111111107', 7, 'Hemograma', 'Exame laboratorial do paciente 7', 'https://hospital.local/exames/007.pdf', '2025-08-08 11:00:00', 'Analisado'),
+('11111111108', 8, 'Raio-X', 'Exame de imagem do paciente 8', 'https://hospital.local/exames/008.pdf', '2025-09-09 11:00:00', 'Enviado'),
+('11111111109', 9, 'Ultrassom', 'Exame de imagem do paciente 9', 'https://hospital.local/exames/009.pdf', '2025-10-10 11:00:00', 'Analisado'),
+('11111111110', 10, 'Glicemia', 'Exame laboratorial do paciente 10', 'https://hospital.local/exames/010.pdf', '2025-11-11 11:00:00', 'Enviado'),
+('11111111111', 11, 'Eletrocardiograma', 'Exame cardiologico do paciente 11', 'https://hospital.local/exames/011.pdf', '2025-12-12 11:00:00', 'Analisado'),
+('11111111112', 12, 'Tomografia', 'Exame de imagem do paciente 12', 'https://hospital.local/exames/012.pdf', '2025-01-13 11:00:00', 'Enviado'),
+('11111111113', 13, 'Hemograma', 'Exame laboratorial do paciente 13', 'https://hospital.local/exames/013.pdf', '2025-02-14 11:00:00', 'Analisado'),
+('11111111114', 14, 'Raio-X', 'Exame de imagem do paciente 14', 'https://hospital.local/exames/014.pdf', '2025-03-15 11:00:00', 'Enviado'),
+('11111111115', 15, 'Ultrassom', 'Exame de imagem do paciente 15', 'https://hospital.local/exames/015.pdf', '2025-04-16 11:00:00', 'Analisado');
+-- Insere 15 internações hospitalares.
+INSERT INTO internacao (cpf_paciente,id_leito,crm_medico_responsavel,data_entrada,data_saida,motivo,status) VALUES
+('11111111101', 1, 'CRM-MA-00001', '2025-02-02', NULL, 'Observação hospitalar 1', 'Ativa'),
+('11111111102', 2, 'CRM-MA-00002', '2025-03-03', NULL, 'Observação hospitalar 2', 'Ativa'),
+('11111111103', 3, 'CRM-MA-00003', '2025-04-04', NULL, 'Observação hospitalar 3', 'Ativa'),
+('11111111104', 4, 'CRM-MA-00004', '2025-05-05', NULL, 'Observação hospitalar 4', 'Ativa'),
+('11111111105', 5, 'CRM-MA-00005', '2025-06-06', NULL, 'Observação hospitalar 5', 'Ativa'),
+('11111111106', 6, 'CRM-MA-00006', '2025-07-07', NULL, 'Observação hospitalar 6', 'Ativa'),
+('11111111107', 7, 'CRM-MA-00007', '2025-08-08', NULL, 'Observação hospitalar 7', 'Ativa'),
+('11111111108', 8, 'CRM-MA-00008', '2025-09-09', NULL, 'Observação hospitalar 8', 'Ativa'),
+('11111111109', 9, 'CRM-MA-00009', '2025-10-10', NULL, 'Observação hospitalar 9', 'Ativa'),
+('11111111110', 10, 'CRM-MA-00010', '2025-11-11', NULL, 'Observação hospitalar 10', 'Ativa'),
+('11111111111', 11, 'CRM-MA-00011', '2025-12-12', NULL, 'Observação hospitalar 11', 'Ativa'),
+('11111111112', 12, 'CRM-MA-00012', '2025-01-13', NULL, 'Observação hospitalar 12', 'Ativa'),
+('11111111113', 13, 'CRM-MA-00013', '2025-02-14', NULL, 'Observação hospitalar 13', 'Ativa'),
+('11111111114', 14, 'CRM-MA-00014', '2025-03-15', NULL, 'Observação hospitalar 14', 'Ativa'),
+('11111111115', 15, 'CRM-MA-00015', '2025-04-16', NULL, 'Observação hospitalar 15', 'Ativa');
+-- Insere 15 pagamentos das consultas.
+INSERT INTO pagamento (id_consulta,valor,data_pagamento,forma_pagamento,status) VALUES
+(1, 190.00, '2025-02-02', 'Pix', 'Pago'),
+(2, 200.00, '2025-03-03', 'Cartao', 'Pendente'),
+(3, 210.00, '2025-04-04', 'Dinheiro', 'Estornado'),
+(4, 220.00, '2025-05-05', 'Convenio', 'Pago'),
+(5, 230.00, '2025-06-06', 'Pix', 'Pendente'),
+(6, 240.00, '2025-07-07', 'Cartao', 'Estornado'),
+(7, 250.00, '2025-08-08', 'Dinheiro', 'Pago'),
+(8, 260.00, '2025-09-09', 'Convenio', 'Pendente'),
+(9, 270.00, '2025-10-10', 'Pix', 'Estornado'),
+(10, 280.00, '2025-11-11', 'Cartao', 'Pago'),
+(11, 290.00, '2025-12-12', 'Dinheiro', 'Pendente'),
+(12, 300.00, '2025-01-13', 'Convenio', 'Estornado'),
+(13, 310.00, '2025-02-14', 'Pix', 'Pago'),
+(14, 320.00, '2025-03-15', 'Cartao', 'Pendente'),
+(15, 330.00, '2025-04-16', 'Dinheiro', 'Estornado');

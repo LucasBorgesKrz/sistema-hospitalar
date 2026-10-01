@@ -1,0 +1,101 @@
+CREATE TABLE PACIENTE (
+    cpf VARCHAR(14) PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    data_nascimento DATE NOT NULL,
+    telefone VARCHAR(15),
+    endereco VARCHAR(255),
+    usuario VARCHAR(50) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL
+);
+CREATE TABLE MEDICO (
+    crm VARCHAR(20) PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    especialidade VARCHAR(100) NOT NULL,
+    telefone VARCHAR(15),
+    usuario VARCHAR(50) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    preco_consulta DECIMAL(10,2) NOT NULL
+);
+CREATE TABLE CONSULTA (
+    id_consulta INT IDENTITY(1,1) PRIMARY KEY,
+    cpf_paciente VARCHAR(14) NOT NULL,
+    crm_medico VARCHAR(20) NOT NULL,
+    data_consulta DATETIME NOT NULL,
+    diagnostico TEXT,
+    observacoes TEXT,
+    preco DECIMAL(10,2) NOT NULL,
+    imposto AS (CONVERT(DECIMAL(10,2), preco * 0.15)) PERSISTED, -- imposto de 15%
+    total AS (CONVERT(DECIMAL(10,2), preco * 1.15)) PERSISTED,
+    FOREIGN KEY (cpf_paciente) REFERENCES PACIENTE(cpf),
+    FOREIGN KEY (crm_medico) REFERENCES MEDICO(crm)
+);
+
+-- Diagnóstico referenciado na consulta
+CREATE TABLE DIAGNOSTICO (
+    id_diagnostico INT IDENTITY(1,1) PRIMARY KEY,
+    id_consulta INT NOT NULL,
+    descricao TEXT NOT NULL,
+    data_registro DATETIME NOT NULL,
+    FOREIGN KEY (id_consulta) REFERENCES CONSULTA(id_consulta)
+);
+
+-- Receita referenciada na consulta
+CREATE TABLE RECEITA (
+    id_receita INT IDENTITY(1,1) PRIMARY KEY,
+    id_consulta INT NOT NULL,
+    medicamento VARCHAR(100) NOT NULL,
+    dosagem VARCHAR(50),
+    instrucoes TEXT,
+    descricao TEXT NOT NULL,
+    data_emissao DATETIME NOT NULL,
+    FOREIGN KEY (id_consulta) REFERENCES CONSULTA(id_consulta)
+);
+
+GRANT SELECT ON CONSULTA TO paciente_user;
+GRANT SELECT ON RECEITA TO paciente_user;
+GRANT SELECT ON DIAGNOSTICO TO paciente_user;
+
+GRANT INSERT, UPDATE ON PACIENTE TO medico_user;
+GRANT INSERT, UPDATE ON MEDICO TO medico_user;
+GRANT INSERT, UPDATE ON CONSULTA TO medico_user;
+GRANT INSERT, UPDATE ON RECEITA TO medico_user;
+GRANT INSERT, UPDATE ON DIAGNOSTICO TO medico_user;
+
+-- =========================
+-- EXEMPLOS DE INSERÇÃO
+-- =========================
+
+INSERT INTO PACIENTE (cpf, nome, data_nascimento, telefone, endereco, usuario, senha)
+VALUES ('123.456.789-00', 'João Silva', '1990-05-10', '11987654321', 'Rua das Flores, 123', 'joao.silva', 'senha123');
+
+INSERT INTO MEDICO (crm, nome, especialidade, telefone, usuario, senha, preco_consulta)
+VALUES ('CRM12345', 'Dra. Ana Souza', 'Cardiologia', '11987654322', 'ana.souza', 'senha456', 300.00);
+
+INSERT INTO CONSULTA (cpf_paciente, crm_medico, data_consulta, diagnostico, observacoes, preco)
+VALUES ('123.456.789-00', 'CRM12345', '2025-09-21 10:30:00', 'Consulta de rotina', 'Paciente bem', 300.00);
+
+INSERT INTO DIAGNOSTICO (id_consulta, descricao, data_registro)
+VALUES (1, 'Pressão arterial normal', '2025-09-21 10:45:00');
+
+INSERT INTO RECEITA (id_consulta, medicamento, dosagem, instrucoes, descricao, data_emissao)
+VALUES (1, 'Amoxicilina', '500mg', 'Tomar 3x ao dia', 'Antibiótico para infecção leve', '2025-09-21');
+INSERT INTO PACIENTE (cpf, nome, data_nascimento, telefone, endereco, usuario, senha)
+VALUES 
+('987.654.321-00', 'Maria Oliveira', '1985-03-22', '21987654321', 'Av. Paulista, 500', 'maria.oliveira', 'senha789'),
+('456.789.123-99', 'Carlos Pereira', '1978-11-15', '31987654321', 'Rua das Acácias, 45', 'carlos.pereira', 'senha321');
+INSERT INTO MEDICO (crm, nome, especialidade, telefone, usuario, senha, preco_consulta)
+VALUES 
+('CRM67890', 'Dr. Pedro Santos', 'Ortopedia', '21987654323', 'pedro.santos', 'senha654', 250.00),
+('CRM54321', 'Dra. Beatriz Lima', 'Dermatologia', '31987654324', 'beatriz.lima', 'senha987', 200.00);
+INSERT INTO CONSULTA (cpf_paciente, crm_medico, data_consulta, diagnostico, observacoes, preco)
+VALUES 
+('987.654.321-00', 'CRM67890', '2025-10-05 14:00:00', 'Dor no joelho', 'Paciente relata dor após corrida', 250.00),
+('456.789.123-99', 'CRM54321', '2025-10-10 09:30:00', 'Lesão de pele', 'Paciente apresenta manchas vermelhas', 200.00);
+INSERT INTO DIAGNOSTICO (id_consulta, descricao, data_registro)
+VALUES 
+(2, 'Exame físico indica inflamação leve', '2025-10-05 14:30:00'),
+(3, 'Possível dermatite alérgica', '2025-10-10 09:45:00');
+INSERT INTO RECEITA (id_consulta, medicamento, dosagem, instrucoes, descricao, data_emissao)
+VALUES 
+(2, 'Ibuprofeno', '400mg', 'Tomar 2x ao dia por 5 dias', 'Anti-inflamatório para dor no joelho', '2025-10-05'),
+(3, 'Pomada corticóide', 'Aplicar fina camada', 'Usar 2x ao dia por 7 dias', 'Tratamento para dermatite', '2025-10-10');
