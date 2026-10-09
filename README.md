@@ -27,6 +27,7 @@ O modelo foi ampliado a partir das entidades originais, preservando **PACIENTE, 
 - **RECEITA**: PK `id_receita`, FKs `id_consulta` e `id_medicamento`.
 - **INTERNACAO**: PK `id_internacao`, FKs `cpf_paciente`, `id_leito` e `crm_medico_responsavel`.
 - **PAGAMENTO**: PK `id_pagamento`, FK `id_consulta`.
+- - **EXAME**: PK `id_exame`, FKs `cpf_paciente` e `id_consulta`.
 
 ### Cardinalidades principais
 
