@@ -2,9 +2,19 @@
 -- Cria a ROLE de grupo (sem login) e os usuários (com login).
 -- Executar como administrador do banco.
 
-DROP ROLE IF EXISTS paciente_user;
-DROP ROLE IF EXISTS medico_user;
-DROP ROLE IF EXISTS role_leitura;
+-- Limpeza segura: remove permissões penduradas antes de apagar cada role.
+-- Limpeza segura: remove permissões penduradas antes de apagar cada role.
+DO $$
+DECLARE r text;
+BEGIN
+  FOREACH r IN ARRAY ARRAY['paciente_user','medico_user','role_leitura'] LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
+      EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA public FROM %I', r);
+      EXECUTE format('REVOKE ALL ON SCHEMA public FROM %I', r);
+      EXECUTE format('DROP ROLE %I', r);
+    END IF;
+  END LOOP;
+END $$;
 
 -- ROLE de grupo: concentra permissões comuns; não faz login.
 CREATE ROLE role_leitura NOLOGIN;
