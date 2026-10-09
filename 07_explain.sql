@@ -1,20 +1,24 @@
 -- 07_explain.sql
--- Arquivo de documentação da análise de desempenho.
--- O validador SQL usado no projeto não reconhece o comando EXPLAIN.
--- Os comandos executáveis estão em 07_explain_postgresql.sql.
--- Eles devem ser executados em uma conexão PostgreSQL.
---
--- Consulta 1: JOIN entre consulta, paciente e médico.
--- EXPLAIN ANALYZE SELECT c.id_consulta, p.nome AS paciente, m.nome AS medico, c.data_consulta
--- FROM consulta c JOIN paciente p ON p.cpf = c.cpf_paciente
--- JOIN medico m ON m.crm = c.crm_medico
--- WHERE c.crm_medico = 'CRM-MA-00001' ORDER BY c.data_consulta;
---
--- Consulta 2: busca de exames por paciente.
--- EXPLAIN ANALYZE SELECT e.id_exame, e.tipo, e.status, e.data_envio
--- FROM exame e JOIN paciente p ON p.cpf = e.cpf_paciente
--- WHERE e.cpf_paciente = '11111111101' ORDER BY e.data_envio DESC;
---
--- Consulta 3: agregação de pagamentos.
--- EXPLAIN ANALYZE SELECT forma_pagamento, COUNT(*) AS quantidade, SUM(valor) AS total
--- FROM pagamento WHERE data_pagamento >= DATE '2025-01-01' GROUP BY forma_pagamento;
+-- Análise de desempenho com EXPLAIN ANALYZE (PostgreSQL).
+
+-- Com poucos registros o PostgreSQL prefere Seq Scan.
+-- Por isso geramos volume (20 mil linhas) e atualizamos as estatísticas.
+INSERT INTO consulta (cpf_paciente, crm_medico, preco, imposto, total)
+SELECT '11111111101', 'CRM-MA-00001', 100, 15, 115
+FROM generate_series(1, 20000);
+
+ANALYZE consulta;
+
+-- Consulta 1: filtro por paciente (usa idx_consulta_paciente).
+EXPLAIN ANALYZE
+SELECT id_consulta, status
+FROM consulta
+WHERE cpf_paciente = '11111111102';
+
+-- Consulta 2: filtro por médico + ordenação por data (usa idx_consulta_medico_data).
+EXPLAIN ANALYZE
+SELECT id_consulta, data_consulta
+FROM consulta
+WHERE crm_medico = 'CRM-MA-00002'
+ORDER BY data_consulta DESC
+LIMIT 10;
