@@ -43,7 +43,7 @@ CREATE TABLE medico (
     telefone VARCHAR(15),
     usuario VARCHAR(50) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    preco_consulta DECIMAL(10,2) NOT NULL CHECK (preco_consulta > 0),
+    preco_consulta NUMERIC(10,2) NOT NULL CHECK (preco_consulta > 0),
     ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -61,7 +61,7 @@ CREATE TABLE convenio (
     id_convenio INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
     telefone VARCHAR(15),
-    percentual_desconto DECIMAL(5,2) NOT NULL DEFAULT 0 CHECK (percentual_desconto BETWEEN 0 AND 100),
+    percentual_desconto NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK (percentual_desconto BETWEEN 0 AND 100),
     ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -103,7 +103,7 @@ CREATE TABLE medicamento (
     nome VARCHAR(100) NOT NULL UNIQUE,
     principio_ativo VARCHAR(100) NOT NULL,
     fabricante VARCHAR(100) NOT NULL,
-    preco DECIMAL(10,2) NOT NULL CHECK (preco > 0),
+    preco NUMERIC(10,2) NOT NULL CHECK (preco > 0),
     estoque INT NOT NULL DEFAULT 0 CHECK (estoque >= 0)
 );
 
@@ -114,12 +114,12 @@ CREATE TABLE consulta (
     cpf_paciente VARCHAR(11) NOT NULL,
     crm_medico VARCHAR(20) NOT NULL,
     id_convenio INT,
-    data_consulta TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_consulta TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     diagnostico TEXT,
     observacoes TEXT,
-    preco DECIMAL(10,2) NOT NULL CHECK (preco > 0),
-    imposto DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (imposto >= 0),
-    total DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (total >= preco),
+    preco NUMERIC(10,2) NOT NULL CHECK (preco > 0),
+    imposto NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (imposto >= 0),
+    total NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (total >= preco),
     status VARCHAR(20) NOT NULL DEFAULT 'Agendada' CHECK (status IN ('Agendada','Realizada','Cancelada')),
     FOREIGN KEY (cpf_paciente) REFERENCES paciente(cpf),
     FOREIGN KEY (crm_medico) REFERENCES medico(crm),
@@ -131,7 +131,7 @@ CREATE TABLE diagnostico (
     id_diagnostico INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_consulta INT NOT NULL,
     descricao TEXT NOT NULL,
-    data_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_registro TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     gravidade VARCHAR(20) NOT NULL DEFAULT 'Leve' CHECK (gravidade IN ('Leve','Moderada','Grave')),
     FOREIGN KEY (id_consulta) REFERENCES consulta(id_consulta)
 );
@@ -159,7 +159,7 @@ CREATE TABLE exame (
     tipo VARCHAR(50) NOT NULL,
     descricao VARCHAR(255) NOT NULL,
     arquivo_url VARCHAR(500) NOT NULL,
-    data_envio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_envio TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) NOT NULL DEFAULT 'Enviado' CHECK (status IN ('Enviado','Analisado','Arquivado')),
     UNIQUE (cpf_paciente, arquivo_url),
     FOREIGN KEY (cpf_paciente) REFERENCES paciente(cpf),
@@ -186,7 +186,7 @@ CREATE TABLE internacao (
 CREATE TABLE pagamento (
     id_pagamento INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_consulta INT NOT NULL UNIQUE,
-    valor DECIMAL(10,2) NOT NULL CHECK (valor > 0),
+    valor NUMERIC(10,2) NOT NULL CHECK (valor > 0),
     data_pagamento DATE NOT NULL DEFAULT CURRENT_DATE,
     forma_pagamento VARCHAR(20) NOT NULL CHECK (forma_pagamento IN ('Pix','Cartao','Dinheiro','Convenio')),
     status VARCHAR(20) NOT NULL DEFAULT 'Pago' CHECK (status IN ('Pago','Pendente','Estornado')),
