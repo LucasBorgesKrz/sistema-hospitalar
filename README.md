@@ -42,195 +42,114 @@ O modelo foi ampliado a partir das entidades originais, preservando **PACIENTE, 
 - LEITO 1:N INTERNACAO
 - MEDICO 1:N INTERNACAO
 - CONSULTA 1:1 PAGAMENTO
-
 ## 3. Modelo físico e restrições
 
-O arquivo `01_ddl.sql` possui **14 tabelas**, superando o mínimo de 10.
+O arquivo `01_ddl.sql` cria **14 tabelas** no PostgreSQL, com:
 
-Foram utilizados:
+- **PK** e **FK**: integridade referencial entre todas as entidades.
+- **NOT NULL**: campos obrigatórios (nome, datas, valores).
+- **UNIQUE**: usuário, nomes de entidades, `(id_unidade, numero)` em quartos, `id_consulta` em pagamento (1:1).
+- **CHECK**: preços e estoque não negativos, sexo, status, percentuais de 0 a 100, `data_saida >= data_entrada`.
+- **DEFAULT**: `ativo = TRUE`, status inicial, `CURRENT_DATE` e `CURRENT_TIMESTAMP`.
 
-- **PK:** identificação única de cada registro.
-- **FK:** integridade referencial entre as entidades.
-- **NOT NULL:** campos obrigatórios.
-- **UNIQUE:** usuários, nomes de entidades e combinações que não podem se repetir.
-- **CHECK:** validação de preços, estoque, percentuais, status, sexo e datas.
-- **DEFAULT:** valores automáticos para campos como ativo, status e datas.
-- **Colunas geradas:** `imposto` e `total` da consulta são calculados automaticamente a partir do preço.
+O arquivo `02_inserts.sql` carrega **15 registros por tabela** (210 no total).
 
-O arquivo `02_inserts.sql` contém **15 registros em cada uma das 14 tabelas**, totalizando 210 registros.
+## 4. Justificativa dos tipos de dados
 
-## 4. Justificativa das escolhas
+| Tipo | Onde é usado | Por quê |
+|---|---|---|
+| `NUMERIC(10,2)` | preços, imposto, total, valor | Exato, sem erro de arredondamento de `FLOAT`. Essencial para dinheiro. |
+| `TIMESTAMPTZ` | `data_consulta`, `data_registro`, `data_envio` | Guarda o fuso horário e evita ambiguidade entre unidades em fusos diferentes. |
+| `DATE` | nascimento, entrada/saída, pagamento | Quando a hora não importa. |
+| `TEXT` | diagnóstico, observações, instruções, descrições | Texto clínico sem limite fixo. |
+| `VARCHAR(n)` | CPF, CRM, nome, telefone, status | Tamanho conhecido, limita entradas inválidas. |
+| `INT GENERATED ALWAYS AS IDENTITY` | chaves substitutas | Padrão SQL moderno que substitui `SERIAL`: o banco não aceita ID manual por engano. |
+| `BOOLEAN` | `ativo` | Verdadeiro/falso sem códigos soltos. |
 
-A separação das entidades evita concentrar informações diferentes em uma única tabela e reduz redundância.
+`cpf` (paciente) e `crm` (médico) são chaves naturais informadas no cadastro, validadas por `CHECK`.
 
-- **Paciente e médico** mantêm dados cadastrais.
-- **Consulta** registra o atendimento e relaciona paciente, médico e convênio.
-- **Diagnóstico e receita** ficam separados porque uma consulta pode gerar mais de um registro clínico ou prescrição.
-- **Medicamento** permite reutilização do cadastro de medicamentos em várias receitas.
-- **Unidade, quarto e leito** representam a estrutura física hospitalar.
-- **Internação** registra o uso dos leitos e o médico responsável.
-- **Pagamento** separa o controle financeiro do atendimento.
-- **Índices** foram criados principalmente em FKs e colunas usadas em filtros, JOINs e consultas de agrupamento.
+## 5. Estratégia de indexação
 
-## 5. Índices criados
+Arquivo: `03_indices.sql` (**12 índices**). O PostgreSQL cria índice automático só para PK e UNIQUE, **não para FK**, então indexamos as FKs usadas em `JOIN` e as colunas de `WHERE`/`ORDER BY`. Não indexamos tudo, para não penalizar `INSERT`/`UPDATE`/`DELETE`.
 
-Arquivo: `03_indices.sql`.
-
-1. `idx_consulta_paciente`: acelera consultas e JOINs por paciente.
-2. `idx_consulta_medico_data`: auxilia filtros por médico e ordenação por data.
-3. `idx_consulta_status`: auxilia filtros por situação da consulta.
-4. `idx_diagnostico_consulta`: acelera busca de diagnósticos por consulta.
-5. `idx_receita_consulta`: acelera busca de receitas por consulta.
-6. `idx_internacao_paciente_status`: auxilia busca de internações ativas de pacientes.
-7. `idx_internacao_leito`: auxilia consultas sobre ocupação de leitos.
-8. `idx_pagamento_data_status`: auxilia filtros financeiros por data e situação.
-9. `idx_medicamento_principio`: auxilia pesquisas pelo princípio ativo.
-10. `idx_quarto_unidade`: acelera a relação entre quartos e unidades.
+| Índice | Colunas | Justificativa |
+|---|---|---|
+| `idx_consulta_paciente` | `consulta(cpf_paciente)` | FK; busca e JOIN de consultas por paciente. |
+| `idx_consulta_medico_data` | `consulta(crm_medico, data_consulta)` | Composto: filtra por médico e já entrega ordenado por data. |
+| `idx_consulta_status` | `consulta(status)` | Filtro frequente por situação da consulta. |
+| `idx_diagnostico_consulta` | `diagnostico(id_consulta)` | FK; diagnósticos de uma consulta. |
+| `idx_receita_consulta` | `receita(id_consulta)` | FK; receitas de uma consulta. |
+| `idx_internacao_paciente_status` | `internacao(cpf_paciente, status)` | Internações ativas de um paciente. |
+| `idx_internacao_leito` | `internacao(id_leito)` | FK; ocupação de leitos. |
+| `idx_pagamento_data_status` | `pagamento(data_pagamento, status)` | Relatórios financeiros por período e situação. |
+| `idx_medicamento_principio` | `medicamento(principio_ativo)` | Pesquisa por princípio ativo. |
+| `idx_quarto_unidade` | `quarto(id_unidade)` | FK; quartos de uma unidade. |
+| `idx_exame_paciente_data` | `exame(cpf_paciente, data_envio)` | Exames de um paciente, mais recentes primeiro. |
+| `idx_exame_consulta` | `exame(id_consulta)` | FK; exames ligados a uma consulta. |
 
 ## 6. Consultas SQL
 
-Arquivo: `04_consultas.sql`.
-
-Foram implementadas **15 consultas**, incluindo:
-
-1. JOIN entre consultas, pacientes e médicos.
-2. JOIN entre diagnósticos, consultas, pacientes e médicos.
-3. GROUP BY para quantidade de consultas por médico.
-4. GROUP BY para faturamento por forma de pagamento.
-5. GROUP BY + HAVING para médicos com consultas.
-6. Subconsulta para pacientes que possuem consultas.
-7. Subconsulta para médicos acima do preço médio.
-8. Subconsulta para medicamentos prescritos.
-9. GROUP BY para quantidade de receitas por medicamento.
-10. GROUP BY para situação dos leitos.
-11. JOIN múltiplo para internações.
-12. Funções de agregação para valores de consultas.
-13. Subconsulta para consultas acima da média.
-14. JOIN com filtro para receitas.
-15. GROUP BY para status das consultas.
-
-Assim, o requisito de 10 ou mais consultas é atendido, com uso de **JOIN, GROUP BY, HAVING, subconsultas e agregações**.
+Arquivo: `04_consultas.sql`, com **15 consultas** (JOIN, GROUP BY, HAVING, subconsultas e agregações).
 
 ## 7. Transações
 
-Arquivo: `05_transacoes.sql`.
+Arquivo: `05_transacoes.sql`. O PostgreSQL usa MVCC, então leituras não bloqueiam escritas durante essas transações.
 
-### Transação 1 - COMMIT
+**Transação 1 (COMMIT):** registra um atendimento completo. Um `INSERT` em `consulta` usa `RETURNING id_consulta` dentro de um `WITH` e repassa o ID para `pagamento` e `receita`. Depois, um `SAVEPOINT` e o `INSERT` em `diagnostico`. Grava em **4 tabelas**.
 
-Registra o pagamento da consulta e reduz uma unidade do estoque do medicamento. Ao executar `COMMIT`, as alterações são confirmadas.
+**Transação 2 (SAVEPOINT + ROLLBACK TO):** insere `consulta` e `pagamento`, cria o `SAVEPOINT antes_receita`, insere uma `receita` e a desfaz com `ROLLBACK TO SAVEPOINT`. No `COMMIT`, só consulta e pagamento permanecem: a atomicidade é parcial e controlada.
 
-### Transação 2 - ROLLBACK
+**Transação 3 (ROLLBACK):** cancela uma consulta com `UPDATE` e desfaz tudo com `ROLLBACK`; o `SELECT` final confirma que o status original foi preservado.
 
-Altera temporariamente o status de uma consulta para `Cancelada`. Em seguida, `ROLLBACK` desfaz a alteração. A consulta final verifica que o valor anterior foi preservado.
+## 8. Controle de acesso
 
-O projeto demonstra os comandos `BEGIN`, `COMMIT` e `ROLLBACK`.
+Arquivos: `06_criacao_usuarios_postgresql.sql` e `06_permissoes.sql`. Aplica o **princípio do menor privilégio**: parte de `REVOKE ALL` e concede só o necessário.
 
-## 8. Usuários, GRANT, REVOKE e segurança
+- **`role_leitura`** (ROLE de grupo, `NOLOGIN`): `SELECT` nas tabelas de apoio (especialidade, convênio, unidade, quarto, leito, medicamento).
+- **`medico_user`** (herda `role_leitura`): lê dados clínicos; `INSERT`/`UPDATE` em consulta, diagnóstico, receita e internação; `UPDATE` em exame e leito. **Não tem `DELETE`.** Lê `paciente` **sem a coluna `senha`** (permissão por coluna).
+- **`paciente_user`** (herda `role_leitura`): `SELECT` em consulta, diagnóstico, receita, exame e pagamento; `INSERT` apenas em exame e pagamento. Não altera nem exclui nada.
+- `REVOKE DELETE` explícito para os dois usuários.
 
-Arquivo: `06_permissoes.sql`.
+**Testes executados:**
+- `SET ROLE paciente_user; DELETE FROM consulta;` → `ERROR: permission denied for table consulta`
+- `SET ROLE medico_user; SELECT senha FROM paciente;` → `ERROR: permission denied for table paciente`
 
-A segurança foi organizada em quatro papéis: 
+> Limitações: não há Row Level Security, então o paciente enxerga todas as consultas, não só as dele (melhoria futura). As senhas nos scripts são apenas de demonstração.
 
-- **hospital_superuser:** administrador real do PostgreSQL, com `SUPERUSER`, `CREATEDB` e `CREATEROLE`. Deve ser usado somente para administração e não pela aplicação.
-- **hospital_manager:** gerente do sistema, sem `SUPERUSER` e sem `CREATEDB`, com permissões para consultar, inserir, alterar e excluir dados.
-- **medico_user:** pode acessar, inserir, alterar e excluir os dados do sistema, conforme a regra de negócio definida.
-- **paciente_user:** pode visualizar informações do atendimento, enviar exames e realizar pagamentos. Não pode alterar ou excluir dados existentes nem administrar cadastros hospitalares.
+## 9. EXPLAIN ANALYZE
 
-O paciente tem `INSERT` somente em `exame` e `pagamento`, além de `SELECT` nas informações necessárias. O médico possui `SELECT, INSERT, UPDATE, DELETE` nas tabelas do sistema.
+Arquivo: `07_explain.sql`. Com 15 linhas por tabela o PostgreSQL prefere `Seq Scan`, então o script gera **20 mil consultas** com `generate_series` e executa `ANALYZE consulta` para atualizar as estatísticas.
 
-O arquivo também usa `REVOKE` para retirar permissões de escrita e exclusão do paciente.
+**Consulta 1: filtro por paciente**
+```sql
+EXPLAIN ANALYZE SELECT id_consulta, status FROM consulta WHERE cpf_paciente = '11111111102';
+```
+Resultado: **`Index Scan using idx_consulta_paciente`**, execução em ~0,043 ms. O índice foi usado.
 
-### Observação de segurança
+**Consulta 2: médico + ordenação**
+```sql
+EXPLAIN ANALYZE SELECT id_consulta, data_consulta FROM consulta
+WHERE crm_medico = 'CRM-MA-00002' ORDER BY data_consulta DESC LIMIT 10;
+```
+Resultado: **`Index Scan Backward using idx_consulta_medico_data`** com `Limit`, execução em ~0,042 ms. O índice composto já entrega as linhas ordenadas, então o PostgreSQL **dispensa um `Sort`** separado.
 
-O `hospital_superuser` é deliberadamente um superusuário real do PostgreSQL porque o requisito solicita essa categoria. Em um ambiente real, a aplicação nunca deveria usar essa conta. As senhas presentes no arquivo são apenas credenciais de demonstração e devem ser substituídas antes de qualquer uso real.
+Saída completa (cole aqui o texto da aba Raw):
 
-Arquivo: `06_permissoes.sql`.
-
-Foram definidos dois usuários:
-
-- **medico_user:** possui permissões de leitura e, nas tabelas operacionais, inserção e atualização.
-- **paciente_user:** possui permissões de leitura apenas sobre informações permitidas.
-
-Também são utilizados `REVOKE` para retirar permissões de exclusão e impedir operações de escrita do usuário de paciente.
-
-## 9. EXPLAIN (ANALYZE)
-
-Arquivo: `07_explain.sql`.
-
-Foram preparadas três análises com `EXPLAIN (ANALYZE)`.
-
-A análise deve observar:
-
-- `Index Scan` ou `Bitmap Index Scan`, quando o otimizador considerar o índice vantajoso;
-- `Seq Scan`, que pode ser escolhido quando a tabela possui poucos registros;
-- `actual time`, `rows` e `loops`;
-- diferença entre o custo estimado e o tempo real.
-
-Como o projeto possui apenas 15 registros por tabela, é possível que o PostgreSQL prefira `Seq Scan` em algumas consultas. Isso não significa que o índice esteja incorreto. Com volume maior de dados, os índices tendem a se tornar mais relevantes para os filtros e JOINs definidos.
+```
+COLE AQUI A SAÍDA RAW DOS DOIS EXPLAIN
+```
 
 ## 10. Organização dos arquivos
 
-```text
-01_ddl.sql          -> criação das 14 tabelas e restrições
-02_inserts.sql      -> 15 registros por tabela (210 registros)
-03_indices.sql      -> índices e justificativas
-04_consultas.sql    -> 15 consultas SQL
-05_transacoes.sql   -> transações COMMIT e ROLLBACK
-06_permissoes.sql   -> usuários, GRANT e REVOKE
-07_explain.sql      -> EXPLAIN (ANALYZE)
-README.md           -> documentação do projeto
+```
+01_ddl.sql                          -> 14 tabelas e restrições
+02_inserts.sql                      -> 15 registros por tabela
+03_indices.sql                      -> 12 índices
+04_consultas.sql                    -> 15 consultas
+05_transacoes.sql                   -> 3 transações
+06_criacao_usuarios_postgresql.sql  -> role e usuários
+06_permissoes.sql                   -> GRANT e REVOKE
+07_explain.sql                      -> EXPLAIN ANALYZE
 ```
 
-## 11. Atendimento aos requisitos
-
-| Requisito | Atendimento |
-|---|---|
-| Modelo lógico | Sim, documentado no README |
-| Modelo físico | Sim |
-| 10+ tabelas | **14 tabelas** |
-| PK | Sim |
-| FK | Sim |
-| NOT NULL | Sim |
-| UNIQUE | Sim |
-| CHECK | Sim |
-| DEFAULT | Sim |
-| 15 registros por tabela | **Sim, 210 registros** |
-| Índices justificados | **10 índices** |
-| 10+ consultas | **15 consultas** |
-| JOIN | Sim |
-| GROUP BY | Sim |
-| Subconsultas | Sim |
-| 2+ transações | **2 transações** |
-| BEGIN | Sim |
-| COMMIT | Sim |
-| ROLLBACK | Sim |
-| 2+ usuários | **2 usuários** |
-| GRANT | Sim |
-| REVOKE | Sim |
-| EXPLAIN (ANALYZE) | **3 análises** |
-| README completo | Sim |
-
-
-### Cadastro de CPF e CRM
-O `cpf` do paciente e o `crm` do médico são informados no cadastro. Eles são chaves primárias (`PRIMARY KEY`) e não utilizam `GENERATED AS IDENTITY`. O banco apenas valida o formato e garante a unicidade.
-
-A tabela **EXAME** permite que o paciente envie seus exames, relacionando o arquivo ao próprio CPF e, quando aplicável, à consulta. O paciente também pode registrar pagamentos, enquanto o médico pode acessar e alterar os dados do sistema.
-
-
-## Comentários nos arquivos SQL
-Todos os arquivos SQL possuem comentários explicando a função dos principais comandos utilizados, como CREATE TABLE, INSERT, CREATE INDEX, SELECT, JOIN, GROUP BY, HAVING, subconsultas, START TRANSACTION, COMMIT e ROLLBACK, GRANT, REVOKE e EXPLAIN (ANALYZE).
-
-
-### Compatibilidade no DBeaver
-
-Os arquivos foram preparados para PostgreSQL. No DBeaver, a conexão deve ser PostgreSQL e o dialeto SQL do editor deve estar configurado como PostgreSQL. `EXPLAIN (ANALYZE)`, `CREATE USER`, `GRANT`, `REVOKE` e transações são comandos suportados pelo PostgreSQL.
-
-No DDL, a validação de CPF/CRM usa `CHECK` com `length()` para evitar o operador de expressão regular `~`, que alguns validadores genéricos do DBeaver não reconhecem. CPF e CRM continuam sendo informados manualmente pelo cadastro.
-
-## Execução das permissões no PostgreSQL
-
-O arquivo `06_permissoes.sql` contém somente GRANT/REVOKE. Antes dele, em uma conexão PostgreSQL administrativa, execute `06_criacao_usuarios_postgresql.sql` para criar os quatro usuários.
-
-O arquivo `07_explain.sql` contém `EXPLAIN ANALYZE`, que é requisito do trabalho e é sintaxe específica do PostgreSQL.
-
-Se o DBeaver sublinhar `CREATE USER` ou `EXPLAIN ANALYZE` como erro antes da execução, configure o SQL dialect da conexão/arquivo para PostgreSQL. Esses comandos não são comandos SQL genéricos e não podem ser tornados simultaneamente compatíveis com todos os bancos sem deixar de cumprir o requisito de PostgreSQL.
+**Ordem de execução:** 01, 02, 03, 04, 05, 06 (criação), 06 (permissões), 07. O `07` vai por último porque insere 20 mil linhas de teste.
