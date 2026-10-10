@@ -1,0 +1,18 @@
+    tabela     | linhas 	    tabela     | linhas 
+---------------+--------	---------------+--------
+ consulta      |  40017	 consulta      |  40017
+ convenio      |     15	 convenio      |     15
+ diagnostico   |     16	 diagnostico   |     16
+ especialidade |     15	 especialidade |     15
+ exame         |     15	 exame         |     15
+ internacao    |     15	 internacao    |     15
+ leito         |     15	 leito         |     15
+ medicamento   |     15	 medicamento   |     15
+ medico        |     15	 medico        |     15
+ paciente      |     15	 paciente      |     15
+ pagamento     |     17	 pagamento     |     17
+ quarto        |     15	 quarto        |     15
+ receita       |     16	 receita       |     16
+ unidade       |     15	 unidade       |     15
+(14 rows)	(14 rows)
+	
