@@ -1,0 +1,127 @@
+
+== Totais ==
+{
+  medicos: 4,
+  pacientes: 6,
+  consultas: 8
+}
+
+== 1) Pacientes da Unimed, ordenados por nome (projeção) ==
+{
+  nome: 'Carlos Nunes',
+  convenio: {
+    plano: 'Básico'
+  }
+}
+{
+  nome: 'Maria Silva',
+  convenio: {
+    plano: 'Premium'
+  }
+}
+
+== 2) Consultas realizadas com valor >= 250, da mais cara para a mais barata ==
+{
+  tipo: 'primeira',
+  valor: 350,
+  diagnostico: 'dermatite de contato'
+}
+{
+  tipo: 'primeira',
+  valor: 300,
+  diagnostico: 'tendinite no ombro direito'
+}
+{
+  tipo: 'retorno',
+  valor: 250,
+  diagnostico: 'hipertensão arterial controlada'
+}
+{
+  tipo: 'rotina',
+  valor: 250,
+  diagnostico: 'insuficiência cardíaca leve'
+}
+
+== 3) Pacientes particulares (sem campo convenio) ==
+{
+  nome: 'Paula Costa'
+}
+{
+  nome: 'Ricardo Gomes'
+}
+
+== 4) Pacientes com alguma alergia ==
+{
+  nome: 'Maria Silva',
+  alergias: [
+    'dipirona'
+  ]
+}
+{
+  nome: 'Fernanda Alves',
+  alergias: [
+    'penicilina',
+    'látex'
+  ]
+}
+
+== 5) Junção com $lookup: consultas realizadas com nome do paciente e do médico ==
+{
+  data_hora: ISODate('2026-03-10T09:00:00.000Z'),
+  valor: 250,
+  paciente: 'Maria Silva',
+  medico: 'Dra. Ana Souza'
+}
+{
+  data_hora: ISODate('2026-03-15T14:00:00.000Z'),
+  valor: 300,
+  paciente: 'João Pereira',
+  medico: 'Dra. Carla Mendes'
+}
+{
+  data_hora: ISODate('2026-04-02T11:00:00.000Z'),
+  valor: 350,
+  paciente: 'Paula Costa',
+  medico: 'Dr. Diego Rocha'
+}
+{
+  data_hora: ISODate('2026-04-08T08:30:00.000Z'),
+  valor: 200,
+  paciente: 'Carlos Nunes',
+  medico: 'Dr. Bruno Lima'
+}
+{
+  data_hora: ISODate('2026-05-07T15:00:00.000Z'),
+  valor: 250,
+  paciente: 'Ricardo Gomes',
+  medico: 'Dra. Ana Souza'
+}
+
+== explain ANTES do índice composto ==
+{
+  estagio: 'COLLSCAN (varre tudo)',
+  docsExaminados: 8,
+  retornados: 2
+}
+
+== Criando índices ==
+cpf_1
+paciente_id_1_data_hora_-1
+diagnostico_text
+
+== explain DEPOIS do índice composto ==
+{
+  estagio: 'IXSCAN (usa índice)',
+  docsExaminados: 2,
+  retornados: 2
+}
+
+== Busca por texto: 'cardíaca' ==
+{
+  diagnostico: 'insuficiência cardíaca leve'
+}
+
+== Índices da collection consultas ==
+_id_
+paciente_id_1_data_hora_-1
+diagnostico_text
