@@ -134,10 +134,32 @@ WHERE crm_medico = 'CRM-MA-00002' ORDER BY data_consulta DESC LIMIT 10;
 ```
 Resultado: **`Index Scan Backward using idx_consulta_medico_data`** com `Limit`, execução em ~0,042 ms. O índice composto já entrega as linhas ordenadas, então o PostgreSQL **dispensa um `Sort`** separado.
 
-Saída completa (cole aqui o texto da aba Raw):
+Saída completa:
 
+**Consulta 1**
 ```
-COLE AQUI A SAÍDA RAW DOS DOIS EXPLAIN
+Index Scan using idx_consulta_paciente on consulta  (cost=0.29..8.31 rows=1 width=13) (actual time=0.010..0.012 rows=2.00 loops=1)
+  Index Cond: ((cpf_paciente)::text = '11111111102'::text)
+  Index Searches: 1
+  Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=45
+Planning Time: 0.161 ms
+Execution Time: 0.034 ms
+```
+
+**Consulta 2**
+```
+Limit  (cost=0.29..8.31 rows=1 width=12) (actual time=0.009..0.014 rows=2.00 loops=1)
+  Buffers: shared hit=5
+  ->  Index Scan Backward using idx_consulta_medico_data on consulta  (cost=0.29..8.31 rows=1 width=12) (actual time=0.008..0.013 rows=2.00 loops=1)
+        Index Cond: ((crm_medico)::text = 'CRM-MA-00002'::text)
+        Index Searches: 1
+        Buffers: shared hit=5
+Planning:
+  Buffers: shared hit=28 read=3
+Planning Time: 1.834 ms
+Execution Time: 0.038 ms
 ```
 
 ## 10. Organização dos arquivos
